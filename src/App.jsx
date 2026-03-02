@@ -1,10 +1,11 @@
-function App() {
-  
+import Layout from './components/Layout'
+import MacroForm from './components/MacroForm'
 
+function App() {
   return (
-    <div>
-      <h1>Hi</h1>
-    </div>
+    <Layout>
+      <MacroForm />
+    </Layout>
   )
 }
 
