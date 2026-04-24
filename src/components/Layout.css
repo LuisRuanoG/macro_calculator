@@ -8,8 +8,7 @@
 
 .app-header {
   text-align: center;
-  padding-top: 80px;
-  padding-bottom: 40px;
+  padding: 80px 20px 40px;
 }
 
 .app-header h1 {
@@ -24,5 +23,50 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 20px;
+  padding: 0 20px 32px;
+}
+
+.app-footer {
+  padding: 0 20px 32px;
+  text-align: center;
+  color: #aab6c5;
+}
+
+.app-footer p {
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.app-footer p + p {
+  margin-top: 6px;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 56px 16px 28px;
+  }
+
+  .app-header h1 {
+    font-size: 2.3rem;
+  }
+
+  .app-main {
+    padding: 0 16px 24px;
+  }
+
+  .app-footer {
+    padding: 0 16px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header h1 {
+    font-size: 1.95rem;
+  }
+
+  .app-footer p {
+    font-size: 0.92rem;
+  }
 }

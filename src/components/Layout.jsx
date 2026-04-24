@@ -10,6 +10,11 @@ function Layout({ children }) {
       <main className="app-main">
         {children}
       </main>
+
+      <footer className="app-footer">
+        <p>&copy; 2026 Luis Ruano. All rights reserved.</p>
+        <p>Results are estimates and should not replace professional nutrition advice.</p>
+      </footer>
     </div>
   )
 }
