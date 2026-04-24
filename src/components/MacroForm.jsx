@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './MacroForm.css'
+import MacroResults from './MacroResults'
 
 function MacroForm() {
   const [unit, setUnit] = useState('metric')
@@ -13,9 +14,47 @@ function MacroForm() {
   const [activity, setActivity] = useState('sedentary')
   const [results, setResults] = useState(null)
 
+  const numericWeight = parseFloat(weight)
+  const numericAge = parseInt(age, 10)
+  const numericHeightCm = parseFloat(heightCm)
+  const numericHeightFt = parseFloat(heightFt)
+  const numericHeightIn = parseFloat(heightIn)
+
+  const isWeightValid = Number.isFinite(numericWeight) && numericWeight > 0
+  const isAgeValid = Number.isInteger(numericAge) && numericAge > 0
+  const isMetricHeightValid = Number.isFinite(numericHeightCm) && numericHeightCm > 0
+  const isImperialHeightValid =
+    Number.isFinite(numericHeightFt) &&
+    numericHeightFt > 0 &&
+    Number.isFinite(numericHeightIn) &&
+    numericHeightIn >= 0 &&
+    numericHeightIn < 12
+
+  const isFormValid =
+    isWeightValid &&
+    isAgeValid &&
+    (unit === 'metric' ? isMetricHeightValid : isImperialHeightValid)
+
+  const handleClear = () => {
+    setUnit('metric')
+    setSelectedGoal('maintenance')
+    setWeight('')
+    setHeightFt('')
+    setHeightIn('')
+    setHeightCm('')
+    setAge('')
+    setGender('male')
+    setActivity('sedentary')
+    setResults(null)
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Here you would typically calculate the macros based on the input values
+
+    if (!isFormValid) {
+      setResults(null)
+      return
+    }
 
     //log para ver los valores ingresados
     console.log({
@@ -28,13 +67,14 @@ function MacroForm() {
     })
 
     //calculate macros using the input values and selected goal
-    const numericWeight = 
+    const calculatedWeight = 
       unit === 'metric'
-        ? parseFloat(weight)
+        ? numericWeight
         : parseFloat(weight) * 0.453592 // Convert lbs to kg
-    const numericAge = parseInt(age, 10)
     
-    const numericHeight = unit === 'metric' ? parseFloat(heightCm) : (parseFloat(heightFt) * 30.48) + (parseFloat(heightIn) * 2.54)
+    const numericHeight = unit === 'metric'
+      ? numericHeightCm
+      : (numericHeightFt * 30.48) + (numericHeightIn * 2.54)
     const activityMultiplier = {
       sedentary: 1.2,
       'lightly active': 1.375,
@@ -47,7 +87,7 @@ function MacroForm() {
 
     // Calculate BMR using Mifflin-St Jeor Equation
     const bmr = 
-      (10 * numericWeight) + 
+      (10 * calculatedWeight) + 
       (6.25 * numericHeight) - 
       (5 * numericAge) + 
       genderMultiplier
@@ -63,7 +103,7 @@ function MacroForm() {
     }
 
     //calculate macros based on goal calories
-    const protein = numericWeight * 2 // 2g of protein per kg of body weight
+    const protein = calculatedWeight * 2 // 2g of protein per kg of body weight
     const fat = (goalCalories * 0.25) / 9 // 25% of the calories from fat, divided by 9 to convert to grams
     const carbs = (goalCalories - (protein * 4) - (fat * 9)) / 4 // The rest of the calories for carbohydrates, divided by 4 to convert to grams
 
@@ -121,6 +161,7 @@ function MacroForm() {
             <label>Weight ({unit === 'metric' ? 'kg' : 'lbs'})</label>
             <input 
               type="number" 
+              min="1"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
             />
@@ -131,6 +172,7 @@ function MacroForm() {
             {unit === 'metric' ? (
               <input 
               type="number" 
+              min="1"
               placeholder="cm" 
               value={heightCm}
               onChange={(e) => setHeightCm(e.target.value)}
@@ -139,12 +181,15 @@ function MacroForm() {
               <div className="height-row">
                 <input 
                   type="number" 
+                  min="1"
                   placeholder="ft" 
                   value={heightFt}
                   onChange={(e) => setHeightFt(e.target.value)}
                 />
                 <input 
                   type="number" 
+                  min="0"
+                  max="11"
                   placeholder="in" 
                   value={heightIn}
                   onChange={(e) => setHeightIn(e.target.value)}
@@ -157,6 +202,7 @@ function MacroForm() {
             <label>Age</label>
             <input 
               type="number" 
+              min="1"
               value={age} 
               onChange={(e) => setAge(e.target.value)} 
             />
@@ -193,8 +239,8 @@ function MacroForm() {
           <label>Activity Level:</label>
           <select value={activity} onChange={(e) => setActivity(e.target.value)}>
             <option value="sedentary">Sedentary (little or no exercise)</option>
-            <option value="light active">Lightly active (1-3 days/week)</option>
-            <option value="moderate active">Moderately active (3-5 days/week)</option>
+            <option value="lightly active">Lightly active (1-3 days/week)</option>
+            <option value="moderately active">Moderately active (3-5 days/week)</option>
             <option value="very active">Very active (6-7 days/week)</option>
             <option value="extra active">Extra active (athlete)</option>
           </select>
@@ -223,16 +269,24 @@ function MacroForm() {
         </div>
 
         {/* Actions */}
+        {!isFormValid && (
+          <p className="form-error">
+            Complete all required fields with valid values before submitting.
+          </p>
+        )}
+
         <div className="action-row">
-          <button type="Submit" className="primary-btn">
+          <button type="Submit" className="primary-btn" disabled={!isFormValid}>
             Submit
           </button>
-          <button type="button" className="secondary-btn">
+          <button type="button" className="secondary-btn" onClick={handleClear}>
             Clear
           </button>
         </div>
 
       </form>
+
+      {results && <MacroResults results={results} onClear={handleClear} />}
     </div>
   )
 }
